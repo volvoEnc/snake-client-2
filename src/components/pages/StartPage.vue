@@ -1,18 +1,24 @@
 <template>
   <div class="wrapper">
-    <button class="game-start" :disabled="!enableStart">{{ enableStart ? 'Играть' : 'Подождите...' }}</button>
+    <button class="game-start" :disabled="!enableStart">
+      {{ enableStart ? 'Играть' : 'Подождите...' }}
+    </button>
   </div>
 </template>
 
 <script setup>
-import {onMounted, ref} from "vue";
-import {socket} from "../../main.js";
+import { onMounted, ref } from 'vue';
+import { socket } from '../../main.ts';
+import MapState from '../../game/State/MapState.ts';
 
 const enableStart = ref(false);
 
 onMounted(() => {
+  socket.on('connected', (myId) => {
+    MapState.getInstance().setUserId(myId);
+  });
   checkConnect(0);
-})
+});
 
 function checkConnect(attempts) {
   if (socket.connected) {
@@ -28,7 +34,7 @@ function checkConnect(attempts) {
   setTimeout(() => {
     attempts++;
     checkConnect(attempts);
-  }, 1000)
+  }, 1000);
 }
 </script>
 

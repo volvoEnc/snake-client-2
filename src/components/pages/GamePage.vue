@@ -1,12 +1,12 @@
 <template>
   <div class="wrapper">
-    <div class="game" id="game"></div>
+    <div id="game" class="game" />
   </div>
 </template>
 
 <script setup>
-import {onMounted, ref} from "vue";
-import {initPhaser} from "../../main.js";
+import { onMounted, ref } from 'vue';
+import { initPhaser } from '../../main.ts';
 
 const phaserInstance = ref(null);
 
@@ -17,7 +17,7 @@ onMounted(() => {
 
 <style scoped>
 .wrapper {
-  border: solid 1px #32CD32;
+  border: solid 1px #32cd32;
 }
 .game-start {
   width: 300px;

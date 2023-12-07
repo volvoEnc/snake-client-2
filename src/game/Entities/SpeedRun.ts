@@ -1,4 +1,4 @@
-import {socket} from "../../main.js";
+import {socket} from "../../main";
 
 export default class SpeedRun {
     cof = 5;

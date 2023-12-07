@@ -1,39 +1,39 @@
 <template>
   <div class="main">
-    <StartPage v-if="pageState.start" @click="startGame"/>
+    <StartPage v-if="pageState.start" @click="startGame" />
     <GamePage v-else-if="pageState.game" />
   </div>
 
-<!--  <h2 class="stepsLeft">Осталось: 0</h2>-->
-<!--  <h2 class="reward">Счет: 0</h2>-->
-<!--  <div id="game"></div>-->
+  <!--  <h2 class="stepsLeft">Осталось: 0</h2>-->
+  <!--  <h2 class="reward">Счет: 0</h2>-->
+  <!--  <div id="game"></div>-->
 </template>
 
 <script setup>
-  import StartPage from "./components/pages/StartPage.vue";
-  import {onMounted, reactive, ref} from "vue";
-  import GamePage from "./components/pages/GamePage.vue";
-  import {socket} from "./main.js";
+import StartPage from './components/pages/StartPage.vue';
+import { onMounted, reactive } from 'vue';
+import GamePage from './components/pages/GamePage.vue';
+import { socket } from './main.ts';
+import MapState from './game/State/MapState.ts';
 
-  onMounted(() => {
-    socket.on('joined-room', startGameServer);
-  });
+onMounted(() => {
+  socket.on('joined-room', startGameServer);
+});
 
-  const pageState = reactive({
-    start: true,
-    game: false
-  });
+const pageState = reactive({
+  start: true,
+  game: false,
+});
 
-  function startGame() {
-    socket.emit('start-game');
-  }
+function startGame() {
+  socket.emit('start-game');
+}
 
-  function startGameServer() {
-    pageState.start = false;
-    pageState.game = true;
-  }
-
-
+function startGameServer(data) {
+  MapState.getInstance().setMapData(data);
+  pageState.start = false;
+  pageState.game = true;
+}
 </script>
 
 <style scoped>

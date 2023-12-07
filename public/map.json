@@ -1,0 +1,23 @@
+{
+  "height": 1,
+  "layers": [],
+  "orientation": "orthogonal",
+  "properties": {},
+  "tileheight": 32,
+  "tilesets": [
+    {
+      "firstgid": 1,
+      "image": "empty",
+      "imageheight": 96,
+      "imagewidth": 96,
+      "margin": 0,
+      "name": "map",
+      "properties": {},
+      "spacing": 0,
+      "tileheight": 32,
+      "tilewidth": 32
+    }
+  ],
+  "tilewidth": 32,
+  "version": 1
+}
