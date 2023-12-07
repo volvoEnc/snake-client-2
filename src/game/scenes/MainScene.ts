@@ -74,6 +74,10 @@ export default class MainScene extends Phaser.Scene {
     //     });
     //   });
     //
+
+    socket.on('joined-player', (player) => {
+      this.snakes.push(new Snake(this, player.id, player.snake.body, player.snake.color));
+    });
     socket.on('step', (data: roomData) => {
       // this.stepsLeftText.innerHTML = `Осталось: ${data.stepsLeft}`;
       // data.eats.forEach((data) => {
