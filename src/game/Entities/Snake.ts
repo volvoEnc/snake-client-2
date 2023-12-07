@@ -54,7 +54,6 @@ export default class Snake {
       this.direction = dir;
     });
 
-    // this.updateBody();
     this.draw();
   }
 
@@ -103,30 +102,30 @@ export default class Snake {
         }
       }
 
-      this.scene.tweens.add({
-        targets: bodyGroups.up,
-        ease: 'Linear',
-        duration: this.speed,
-        y: `-=${this.scene.ceilHeight}`,
-      });
-      this.scene.tweens.add({
-        targets: bodyGroups.down,
-        ease: 'Linear',
-        duration: this.speed,
-        y: `+=${this.scene.ceilHeight}`,
-      });
-      this.scene.tweens.add({
-        targets: bodyGroups.left,
-        ease: 'Linear',
-        duration: this.speed,
-        x: `-=${this.scene.ceilWidth}`,
-      });
-      this.scene.tweens.add({
-        targets: bodyGroups.right,
-        ease: 'Linear',
-        duration: this.speed,
-        x: `+=${this.scene.ceilWidth}`,
-      });
+      // this.scene.tweens.add({
+      //   targets: bodyGroups.up,
+      //   ease: 'Linear',
+      //   duration: this.speed,
+      //   y: `-=${this.scene.ceilHeight}`,
+      // });
+      // this.scene.tweens.add({
+      //   targets: bodyGroups.down,
+      //   ease: 'Linear',
+      //   duration: this.speed,
+      //   y: `+=${this.scene.ceilHeight}`,
+      // });
+      // this.scene.tweens.add({
+      //   targets: bodyGroups.left,
+      //   ease: 'Linear',
+      //   duration: this.speed,
+      //   x: `-=${this.scene.ceilWidth}`,
+      // });
+      // this.scene.tweens.add({
+      //   targets: bodyGroups.right,
+      //   ease: 'Linear',
+      //   duration: this.speed,
+      //   x: `+=${this.scene.ceilWidth}`,
+      // });
     }
   }
 

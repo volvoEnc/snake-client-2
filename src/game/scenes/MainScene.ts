@@ -28,6 +28,9 @@ export default class MainScene extends Phaser.Scene {
     if (!this.roomData) {
       return;
     }
+
+    this.scale.setZoom(0.8);
+
     const tilemap = this.make.tilemap({ key: 'map' });
     const tiles = tilemap.addTilesetImage('map', 'tiles');
 
