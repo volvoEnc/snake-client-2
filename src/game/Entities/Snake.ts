@@ -31,8 +31,6 @@ export default class Snake {
   // protected sceneHeight: number;
 
   constructor(scene: MainScene, playerID: string, body: snakeBody[], color: string) {
-    // this.sceneWidth = MapState.getInstance().getMapData()?.map.width ?? 0;
-    // this.sceneHeight = MapState.getInstance().getMapData()?.map.height ?? 0;
     this.body = body;
     this.scene = scene;
     this.color = color;
@@ -40,6 +38,7 @@ export default class Snake {
 
     this.speedBonus = new SpeedRun(playerID, this);
 
+    this.draw();
     if (MapState.getInstance().getUserid() === this.playerId) {
       if (scene.input.keyboard) {
         this.keySpace = scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
@@ -53,8 +52,6 @@ export default class Snake {
     socket.on('direction', (dir: string) => {
       this.direction = dir;
     });
-
-    this.draw();
   }
 
   updateBody(body: snakeBody[]) {
@@ -130,7 +127,6 @@ export default class Snake {
   }
 
   update() {
-    console.log('123');
     let direction = this.direction;
 
     //
@@ -200,6 +196,9 @@ export default class Snake {
           .setOrigin(0.5)
           .setScale(1 - 0.01 * idx);
         if (this.playerId === MapState.getInstance().getUserid()) {
+          if (idx === 0) {
+            this.scene.cameras.main.startFollow(bodyCeil.ceil, true, 1, 1, 100, 100);
+          }
           bodyCeil.ceil.setStrokeStyle(1, 0x000000);
         }
         if (idx === 0) {
