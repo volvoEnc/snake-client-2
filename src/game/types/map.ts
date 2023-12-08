@@ -1,10 +1,15 @@
+import Phaser from 'phaser';
+
 export type snakeBody = {
   x: number;
   y: number;
-  direction: string;
-  ceil: null | any;
 };
+export type snakeBodyItem = {
+  item: Phaser.GameObjects.Shape | null;
+} & snakeBody;
+
 export type roomData = {
+  time: number;
   map: {
     width: number;
     height: number;

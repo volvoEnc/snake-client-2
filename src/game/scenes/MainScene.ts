@@ -3,7 +3,7 @@ import Snake from '../Entities/Snake';
 import Eat from '../Entities/Eat';
 import { roomData } from '../types/map';
 import MapState from '../State/MapState';
-import { socket } from '../../main.ts';
+import { socket } from '../../main';
 
 export default class MainScene extends Phaser.Scene {
   public readonly ceilWidth: number = 32;
@@ -29,7 +29,13 @@ export default class MainScene extends Phaser.Scene {
       return;
     }
 
-    this.scale.setZoom(0.8);
+    // this.scale.setZoom(0.8);
+    this.cameras.main.setBounds(
+      0,
+      0,
+      this.ceilWidth * this.roomData.map.width,
+      this.ceilHeight * this.roomData.map.height,
+    );
 
     const tilemap = this.make.tilemap({ key: 'map' });
     const tiles = tilemap.addTilesetImage('map', 'tiles');
@@ -92,7 +98,7 @@ export default class MainScene extends Phaser.Scene {
       // });
       data.players.forEach((player) => {
         const candidate = this.snakes.find((snake) => snake.playerId === player.id);
-        const my = this.snakes.find(() => MapState.getInstance().getUserid() === player.id);
+        // const my = this.snakes.find(() => MapState.getInstance().getUserid() === player.id);
         if (candidate) {
           candidate.updateBody(player.snake.body);
         }
@@ -123,7 +129,7 @@ export default class MainScene extends Phaser.Scene {
     // socket.emit('init');
   }
 
-  update(time, delta) {
+  update(time: number, delta: number) {
     this.snakes.forEach((snake) => {
       const playerId = MapState.getInstance().getUserid();
       if (playerId && playerId === snake.playerId) {

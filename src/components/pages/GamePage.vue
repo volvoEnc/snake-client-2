@@ -17,7 +17,7 @@ onMounted(() => {
 
 <style scoped>
 .wrapper {
-  border: solid 1px #32cd32;
+  //border: solid 1px #32cd32;
 }
 .game-start {
   width: 300px;

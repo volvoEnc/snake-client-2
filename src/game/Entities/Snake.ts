@@ -2,11 +2,12 @@ import { socket } from '../../main';
 import SpeedRun from './SpeedRun';
 import MapState from '../State/MapState';
 import MainScene from '../scenes/MainScene';
-import { snakeBody } from '../types/map';
+import { snakeBody, snakeBodyItem } from '../types/map';
 import Phaser from 'phaser';
 
 export default class Snake {
   protected body: snakeBody[] = [];
+  protected drawBody: snakeBodyItem[] = [];
   protected direction: string = 'up';
   protected speed = 200;
 
@@ -27,9 +28,6 @@ export default class Snake {
   protected keyDDown = false;
   protected keySpaceDown = false;
 
-  // protected sceneWidth: number;
-  // protected sceneHeight: number;
-
   constructor(scene: MainScene, playerID: string, body: snakeBody[], color: string) {
     this.body = body;
     this.scene = scene;
@@ -38,7 +36,8 @@ export default class Snake {
 
     this.speedBonus = new SpeedRun(playerID, this);
 
-    this.draw();
+    this.drawBody = this.createBody(body);
+
     if (MapState.getInstance().getUserid() === this.playerId) {
       if (scene.input.keyboard) {
         this.keySpace = scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
@@ -48,82 +47,90 @@ export default class Snake {
         this.keyD = scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.D);
       }
     }
-
     socket.on('direction', (dir: string) => {
       this.direction = dir;
     });
   }
 
   updateBody(body: snakeBody[]) {
-    this.destroy();
-
-    this.body = body;
-    this.draw();
-
-    if (this.speedBonus.getBonusActive()) {
-      this.speed = 100;
-    } else {
-      this.speed = 200;
-    }
-
-    for (const bodyCeil of this.body) {
-      const bodyGroups: {
-        up: snakeBody[];
-        down: snakeBody[];
-        left: snakeBody[];
-        right: snakeBody[];
-      } = {
-        up: [],
-        down: [],
-        left: [],
-        right: [],
-      };
-      if (bodyCeil.ceil) {
-        switch (bodyCeil.direction) {
-          case 'up':
-            bodyCeil.y += this.scene.ceilHeight;
-            bodyGroups.up.push(bodyCeil.ceil);
-            break;
-          case 'down':
-            bodyCeil.y -= this.scene.ceilHeight;
-            bodyGroups.down.push(bodyCeil.ceil);
-            break;
-          case 'left':
-            bodyCeil.x += this.scene.ceilWidth;
-            bodyGroups.left.push(bodyCeil.ceil);
-            break;
-          case 'right':
-            bodyCeil.x -= this.scene.ceilWidth;
-            bodyGroups.right.push(bodyCeil.ceil);
-            break;
-        }
+    let index = 0;
+    const bodyGroups: {
+      up: any;
+      down: any;
+      left: any;
+      right: any;
+    } = {
+      up: [],
+      down: [],
+      left: [],
+      right: [],
+    };
+    for (const bodyItem of body) {
+      const drawBodyItem = this.drawBody[index].item;
+      const oldBodyItem = this.body[index];
+      if (!drawBodyItem) {
+        continue;
       }
 
-      // this.scene.tweens.add({
-      //   targets: bodyGroups.up,
-      //   ease: 'Linear',
-      //   duration: this.speed,
-      //   y: `-=${this.scene.ceilHeight}`,
-      // });
-      // this.scene.tweens.add({
-      //   targets: bodyGroups.down,
-      //   ease: 'Linear',
-      //   duration: this.speed,
-      //   y: `+=${this.scene.ceilHeight}`,
-      // });
-      // this.scene.tweens.add({
-      //   targets: bodyGroups.left,
-      //   ease: 'Linear',
-      //   duration: this.speed,
-      //   x: `-=${this.scene.ceilWidth}`,
-      // });
-      // this.scene.tweens.add({
-      //   targets: bodyGroups.right,
-      //   ease: 'Linear',
-      //   duration: this.speed,
-      //   x: `+=${this.scene.ceilWidth}`,
-      // });
+      // Вычисляем направление анимации
+      if (oldBodyItem) {
+        const diffX = oldBodyItem.x - bodyItem.x;
+        const diffY = oldBodyItem.y - bodyItem.y;
+
+        // Right
+        if (diffX === -1) {
+          bodyGroups.right.push(this.drawBody[index].item);
+        }
+        if (diffX === 1) {
+          bodyGroups.left.push(this.drawBody[index].item);
+        }
+        if (diffY === 1) {
+          bodyGroups.up.push(this.drawBody[index].item);
+        }
+        if (diffY === -1) {
+          bodyGroups.down.push(this.drawBody[index].item);
+        }
+      }
+      index++;
     }
+    const speed = 250;
+    this.scene.tweens.add({
+      targets: bodyGroups.right,
+      ease: 'Linear',
+      duration: speed,
+      x: `+=${this.scene.ceilWidth}`,
+    });
+    this.scene.tweens.add({
+      targets: bodyGroups.left,
+      ease: 'Linear',
+      duration: speed,
+      x: `-=${this.scene.ceilWidth}`,
+    });
+    this.scene.tweens.add({
+      targets: bodyGroups.up,
+      ease: 'Linear',
+      duration: speed,
+      y: `-=${this.scene.ceilHeight}`,
+    });
+    this.scene.tweens.add({
+      targets: bodyGroups.down,
+      ease: 'Linear',
+      duration: speed,
+      y: `+=${this.scene.ceilHeight}`,
+    });
+    setTimeout(() => {
+      for (let i = 0; i < body.length; i++) {
+        const bodyItem = body[i];
+        const drawBodyItem = this.drawBody[i].item;
+        // Перемещаем видимые элементы
+        if (drawBodyItem) {
+          drawBodyItem.setX(this.getXCord(bodyItem.x));
+          drawBodyItem.setY(this.getYCord(bodyItem.y));
+        }
+      }
+    }, speed);
+
+    this.body = body;
   }
 
   update() {
@@ -187,37 +194,59 @@ export default class Snake {
     }
   }
 
-  draw() {
+  protected createBody(body: snakeBody[]) {
     let idx = 0;
-    for (const bodyCeil of this.body) {
-      if (bodyCeil.ceil === null) {
-        bodyCeil.ceil = this.scene.add
-          .circle(0, 0, 12, parseInt(this.color))
-          .setOrigin(0.5)
-          .setScale(1 - 0.01 * idx);
-        if (this.playerId === MapState.getInstance().getUserid()) {
-          if (idx === 0) {
-            this.scene.cameras.main.startFollow(bodyCeil.ceil, true, 1, 1, 100, 100);
-          }
-          bodyCeil.ceil.setStrokeStyle(1, 0x000000);
-        }
-        if (idx === 0) {
-          bodyCeil.ceil.setStrokeStyle(3, 0x000000);
-        }
+    const bodyItems: snakeBodyItem[] = [];
+    for (const bodyItem of body) {
+      // make item
+      const bodyDrawItem: snakeBodyItem = {
+        x: bodyItem.x,
+        y: bodyItem.y,
+        item: null,
+      };
+
+      bodyDrawItem.item = this.scene.add
+        .circle(0, 0, 12, parseInt(this.color))
+        .setOrigin(0.5)
+        .setScale(1 - 0.01 * idx);
+      if (idx === 0 && this.playerId === MapState.getInstance().getUserid()) {
+        this.scene.cameras.main.startFollow(bodyDrawItem.item, true);
       }
-      const x = bodyCeil.x * this.scene.ceilWidth + this.scene.ceilWidth / 2;
-      const y = bodyCeil.y * this.scene.ceilHeight + this.scene.ceilHeight / 2;
-      bodyCeil.ceil.x = x;
-      bodyCeil.ceil.y = y;
+
+      // if (bodyCeil.ceil === null) {
+      //   bodyCeil.ceil =
+      //   if () {
+
+      //     bodyCeil.ceil.setStrokeStyle(1, 0x000000);
+      //   }
+      //   if (idx === 0) {
+      //     bodyCeil.ceil.setStrokeStyle(3, 0x000000);
+      //   }
+      // }
+      const x = this.getXCord(bodyDrawItem.x);
+      const y = this.getYCord(bodyDrawItem.y);
+      bodyDrawItem.item.x = x;
+      bodyDrawItem.item.y = y;
       idx++;
+
+      bodyItems.push(bodyDrawItem);
     }
+
+    return bodyItems;
+  }
+
+  protected getXCord(x: number): number {
+    return x * this.scene.ceilWidth + this.scene.ceilWidth / 2;
+  }
+  protected getYCord(y: number): number {
+    return y * this.scene.ceilHeight + this.scene.ceilHeight / 2;
   }
 
   destroy() {
-    for (const bodyCeil of this.body) {
-      if (bodyCeil.ceil !== undefined) {
-        bodyCeil.ceil.destroy(true);
-      }
-    }
+    // for (const bodyCeil of this.body) {
+    //   if (bodyCeil.ceil !== undefined) {
+    //     bodyCeil.ceil.destroy(true);
+    //   }
+    // }
   }
 }
