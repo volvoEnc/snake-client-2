@@ -64,6 +64,18 @@ export default class MainScene extends Phaser.Scene {
     for (const ceil of this.roomData.map.items) {
       layer.fill(ceil.texture, ceil.x, ceil.y, 1, 1);
     }
+    // Создаем карту коллизий
+    for (const item of this.roomData.map.physicalItems) {
+      const ceilWidth = this.ceilWidth / 2;
+      const ceilHeight = this.ceilHeight / 2;
+      const ceil = this.add.rectangle(
+        ceilWidth * item.x,
+        ceilHeight * item.y,
+        ceilWidth,
+        ceilHeight,
+      );
+      ceil.setStrokeStyle(1, 0x000, 0).setOrigin(0, 0);
+    }
 
     // Создаем змеек
     for (const player of this.roomData.players) {

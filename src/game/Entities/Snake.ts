@@ -201,18 +201,7 @@ export default class Snake {
         this.scene.cameras.main.startFollow(bodyDrawItem.item.sprite, true, 0.005, 0.005);
       }
 
-      // if (bodyCeil.ceil === null) {
-      //   bodyCeil.ceil =
-      //   if () {
-
-      //     bodyCeil.ceil.setStrokeStyle(1, 0x000000);
-      //   }
-      //   if (idx === 0) {
-      //     bodyCeil.ceil.setStrokeStyle(3, 0x000000);
-      //   }
-      // }
       idx++;
-
       bodyItems.push(bodyDrawItem);
     }
 
@@ -220,10 +209,12 @@ export default class Snake {
   }
 
   protected getXCord(x: number): number {
-    return x * this.scene.ceilWidth + this.scene.ceilWidth / 2;
+    const ceilWidth = this.scene.ceilWidth / 2;
+    return x * ceilWidth + ceilWidth / 2;
   }
   protected getYCord(y: number): number {
-    return y * this.scene.ceilHeight + this.scene.ceilHeight / 2;
+    const ceilHeight = this.scene.ceilHeight / 2;
+    return y * ceilHeight + ceilHeight / 2;
   }
 
   destroy() {
