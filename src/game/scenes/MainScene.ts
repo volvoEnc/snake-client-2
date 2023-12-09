@@ -21,6 +21,10 @@ export default class MainScene extends Phaser.Scene {
 
   preload() {
     this.load.image('tiles', 'map.png');
+    this.load.image('body1', 'snake/body1.png');
+    this.load.image('body2', 'snake/body2.png');
+    this.load.image('tail1', 'snake/tail1.png');
+    this.load.image('tail2', 'snake/tail2.png');
     this.load.tilemapTiledJSON('map', 'map.json');
   }
 

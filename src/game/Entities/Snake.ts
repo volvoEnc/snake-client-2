@@ -4,6 +4,7 @@ import MapState from '../State/MapState';
 import MainScene from '../scenes/MainScene';
 import { snakeBody, snakeBodyItem } from '../types/map';
 import Phaser from 'phaser';
+import SnakeBody from './SnakeBody';
 
 export default class Snake {
   protected body: snakeBody[] = [];
@@ -13,7 +14,7 @@ export default class Snake {
 
   protected speedBonus: SpeedRun;
   protected scene: MainScene;
-  protected color: string;
+  protected color: number;
   public playerId: string;
 
   protected keySpace: Phaser.Input.Keyboard.Key | null = null;
@@ -28,7 +29,7 @@ export default class Snake {
   protected keyDDown = false;
   protected keySpaceDown = false;
 
-  constructor(scene: MainScene, playerID: string, body: snakeBody[], color: string) {
+  constructor(scene: MainScene, playerID: string, body: snakeBody[], color: number) {
     this.body = body;
     this.scene = scene;
     this.color = color;
@@ -80,55 +81,33 @@ export default class Snake {
         // Right
         if (diffX === -1) {
           bodyGroups.right.push(this.drawBody[index].item);
+          drawBodyItem.setDirection('right');
         }
         if (diffX === 1) {
           bodyGroups.left.push(this.drawBody[index].item);
+          drawBodyItem.setDirection('left');
         }
         if (diffY === 1) {
           bodyGroups.up.push(this.drawBody[index].item);
+          drawBodyItem.setDirection('up');
         }
         if (diffY === -1) {
           bodyGroups.down.push(this.drawBody[index].item);
+          drawBodyItem.setDirection('down');
         }
       }
       index++;
     }
-    const speed = 250;
-    this.scene.tweens.add({
-      targets: bodyGroups.right,
-      ease: 'Linear',
-      duration: speed,
-      x: `+=${this.scene.ceilWidth}`,
-    });
-    this.scene.tweens.add({
-      targets: bodyGroups.left,
-      ease: 'Linear',
-      duration: speed,
-      x: `-=${this.scene.ceilWidth}`,
-    });
-    this.scene.tweens.add({
-      targets: bodyGroups.up,
-      ease: 'Linear',
-      duration: speed,
-      y: `-=${this.scene.ceilHeight}`,
-    });
-    this.scene.tweens.add({
-      targets: bodyGroups.down,
-      ease: 'Linear',
-      duration: speed,
-      y: `+=${this.scene.ceilHeight}`,
-    });
-    setTimeout(() => {
-      for (let i = 0; i < body.length; i++) {
-        const bodyItem = body[i];
-        const drawBodyItem = this.drawBody[i].item;
-        // Перемещаем видимые элементы
-        if (drawBodyItem) {
-          drawBodyItem.setX(this.getXCord(bodyItem.x));
-          drawBodyItem.setY(this.getYCord(bodyItem.y));
-        }
+    for (let i = 0; i < body.length; i++) {
+      const bodyItem = body[i];
+      const drawBodyItem = this.drawBody[i].item;
+      // Перемещаем видимые элементы
+      if (drawBodyItem) {
+        drawBodyItem.sprite.setX(this.getXCord(bodyItem.x));
+        drawBodyItem.sprite.setY(this.getYCord(bodyItem.y));
       }
-    }, speed);
+    }
+    this.drawBody[this.drawBody.length - 1].item?.handleTexture();
 
     this.body = body;
   }
@@ -196,6 +175,7 @@ export default class Snake {
 
   protected createBody(body: snakeBody[]) {
     let idx = 0;
+    let nextItem: SnakeBody | null = null;
     const bodyItems: snakeBodyItem[] = [];
     for (const bodyItem of body) {
       // make item
@@ -204,13 +184,21 @@ export default class Snake {
         y: bodyItem.y,
         item: null,
       };
-
-      bodyDrawItem.item = this.scene.add
-        .circle(0, 0, 12, parseInt(this.color))
-        .setOrigin(0.5)
-        .setScale(1 - 0.01 * idx);
+      bodyDrawItem.item = new SnakeBody(
+        this.scene,
+        this.getXCord(bodyDrawItem.x),
+        this.getYCord(bodyDrawItem.y),
+        'body1',
+        nextItem,
+        bodyItem.x,
+        bodyItem.y,
+        'up',
+        body.length - idx - 1,
+        this.color,
+      );
+      nextItem = bodyDrawItem.item;
       if (idx === 0 && this.playerId === MapState.getInstance().getUserid()) {
-        this.scene.cameras.main.startFollow(bodyDrawItem.item, true);
+        this.scene.cameras.main.startFollow(bodyDrawItem.item.sprite, true, 0.005, 0.005);
       }
 
       // if (bodyCeil.ceil === null) {
@@ -223,10 +211,6 @@ export default class Snake {
       //     bodyCeil.ceil.setStrokeStyle(3, 0x000000);
       //   }
       // }
-      const x = this.getXCord(bodyDrawItem.x);
-      const y = this.getYCord(bodyDrawItem.y);
-      bodyDrawItem.item.x = x;
-      bodyDrawItem.item.y = y;
       idx++;
 
       bodyItems.push(bodyDrawItem);

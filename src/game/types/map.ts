@@ -1,11 +1,12 @@
 import Phaser from 'phaser';
+import SnakeBody from '../Entities/SnakeBody';
 
 export type snakeBody = {
   x: number;
   y: number;
 };
 export type snakeBodyItem = {
-  item: Phaser.GameObjects.Shape | null;
+  item: SnakeBody | null;
 } & snakeBody;
 
 export type roomData = {
@@ -25,7 +26,7 @@ export type roomData = {
     name: string;
     snake: {
       direction: string;
-      color: string;
+      color: number;
       body: snakeBody[];
     };
   }[];
