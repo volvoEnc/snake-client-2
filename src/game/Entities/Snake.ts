@@ -17,17 +17,7 @@ export default class Snake {
   protected color: number;
   public playerId: string;
 
-  protected keySpace: Phaser.Input.Keyboard.Key | null = null;
-  protected keyW: Phaser.Input.Keyboard.Key | null = null;
-  protected keyS: Phaser.Input.Keyboard.Key | null = null;
-  protected keyD: Phaser.Input.Keyboard.Key | null = null;
-  protected keyA: Phaser.Input.Keyboard.Key | null = null;
-
-  protected keyWDown = false;
-  protected keySDown = false;
-  protected keyADown = false;
-  protected keyDDown = false;
-  protected keySpaceDown = false;
+  private keyboardBinds: Map<string, Phaser.Input.Keyboard.Key> | null = null;
 
   constructor(scene: MainScene, playerID: string, body: snakeBody[], color: number) {
     this.body = body;
@@ -41,11 +31,42 @@ export default class Snake {
 
     if (MapState.getInstance().getUserid() === this.playerId) {
       if (scene.input.keyboard) {
-        this.keySpace = scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
-        this.keyW = scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.W);
-        this.keyS = scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S);
-        this.keyA = scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A);
-        this.keyD = scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.D);
+        this.keyboardBinds = new Map();
+
+        this.keyboardBinds.set(
+          'space',
+          scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE),
+        );
+        this.keyboardBinds.set(
+          'shift',
+          scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SHIFT),
+        );
+        this.keyboardBinds.set('w', scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.W));
+        this.keyboardBinds.set('s', scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S));
+        this.keyboardBinds.set('a', scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A));
+        this.keyboardBinds.set('d', scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.D));
+
+        this.keyboardBinds.get('space')?.on('down', () => {
+          // Выстрел
+          socket.emit('shot');
+        });
+        this.keyboardBinds.get('shift')?.on('down', () => {
+          // Ускорение
+          this.speedBonus.activate();
+        });
+
+        this.keyboardBinds.get('w')?.on('down', () => {
+          this.changeDirectionMove('up');
+        });
+        this.keyboardBinds.get('d')?.on('down', () => {
+          this.changeDirectionMove('right');
+        });
+        this.keyboardBinds.get('s')?.on('down', () => {
+          this.changeDirectionMove('down');
+        });
+        this.keyboardBinds.get('a')?.on('down', () => {
+          this.changeDirectionMove('left');
+        });
       }
     }
     socket.on('direction', (dir: string) => {
@@ -55,17 +76,6 @@ export default class Snake {
 
   updateBody(body: snakeBody[]) {
     let index = 0;
-    const bodyGroups: {
-      up: any;
-      down: any;
-      left: any;
-      right: any;
-    } = {
-      up: [],
-      down: [],
-      left: [],
-      right: [],
-    };
     for (const bodyItem of body) {
       const drawBodyItem = this.drawBody[index].item;
       const oldBodyItem = this.body[index];
@@ -80,19 +90,15 @@ export default class Snake {
 
         // Right
         if (diffX === -1) {
-          bodyGroups.right.push(this.drawBody[index].item);
           drawBodyItem.setDirection('right');
         }
         if (diffX === 1) {
-          bodyGroups.left.push(this.drawBody[index].item);
           drawBodyItem.setDirection('left');
         }
         if (diffY === 1) {
-          bodyGroups.up.push(this.drawBody[index].item);
           drawBodyItem.setDirection('up');
         }
         if (diffY === -1) {
-          bodyGroups.down.push(this.drawBody[index].item);
           drawBodyItem.setDirection('down');
         }
       }
@@ -112,66 +118,14 @@ export default class Snake {
     this.body = body;
   }
 
-  update() {
-    let direction = this.direction;
-
-    //
-    if (this.keyW && this.keyW.isDown && !this.keyWDown) {
-      direction = 'up';
-      this.keyWDown = true;
-    }
-
-    if (this.keyW && this.keyW.isUp && this.keyWDown) {
-      this.keyWDown = false;
-    }
-
-    //
-    if (this.keyS && this.keyS.isDown && !this.keySDown) {
-      direction = 'down';
-      this.keySDown = true;
-    }
-
-    if (this.keyS && this.keyS.isUp && this.keySDown) {
-      this.keySDown = false;
-    }
-
-    //
-    if (this.keyA && this.keyA.isDown && !this.keyADown) {
-      direction = 'left';
-      this.keyADown = true;
-    }
-
-    if (this.keyA && this.keyA.isUp && this.keyADown) {
-      this.keyADown = false;
-    }
-
-    //
-    if (this.keyD && this.keyD.isDown && !this.keyDDown) {
-      direction = 'right';
-      this.keyDDown = true;
-    }
-
-    if (this.keyD && this.keyD.isUp && this.keyDDown) {
-      this.keyDDown = false;
-    }
-
-    if (this.direction !== direction) {
-      socket.emit('direction', {
-        id: this.playerId,
-        direction: direction,
-      });
-      this.direction = direction;
-    }
-
-    // Ускорение нажато
-    if (this.keySpace && this.keySpace.isDown && !this.keySpaceDown) {
-      this.keySpaceDown = true;
-      this.speedBonus.activate();
-    }
-    if (this.keySpace && this.keySpace.isUp && this.keySpaceDown) {
-      this.keySpaceDown = false;
-    }
+  protected changeDirectionMove(direction: string): void {
+    this.direction = direction;
+    socket.emit('direction', {
+      direction: direction,
+    });
   }
+
+  update() {}
 
   protected createBody(body: snakeBody[]) {
     let idx = 0;
@@ -215,13 +169,5 @@ export default class Snake {
   protected getYCord(y: number): number {
     const ceilHeight = this.scene.ceilHeight / 2;
     return y * ceilHeight + ceilHeight / 2;
-  }
-
-  destroy() {
-    // for (const bodyCeil of this.body) {
-    //   if (bodyCeil.ceil !== undefined) {
-    //     bodyCeil.ceil.destroy(true);
-    //   }
-    // }
   }
 }

@@ -51,9 +51,18 @@ export interface IPlayer {
   snake: ISnake;
 }
 
+export interface IBullet {
+  id: string;
+  x: number;
+  y: number;
+  direction: string;
+  color: number;
+}
+
 export type roomData = {
   time: number;
   map: IMap;
   eats: IEat[];
   players: IPlayer[];
+  bullets: IBullet[];
 };
