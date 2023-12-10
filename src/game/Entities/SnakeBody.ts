@@ -21,8 +21,8 @@ export default class SnakeBody {
 
   protected readonly TEXTURES = {
     head: {
-      default: 'body2',
-      rotate: 'body1',
+      default: 'head1',
+      rotate: 'head1',
     },
     tail: {
       default: 'tail1',
