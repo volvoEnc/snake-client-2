@@ -109,6 +109,18 @@ export default class MainScene extends Phaser.Scene {
         this.bullets.splice(deletePlayerIndex, 1);
       }
     });
+    socket.on('dead', (data: { id: string }) => {
+      const snake = this.snakes.find((snake) => snake.playerId === data.id);
+      if (snake) {
+        snake.dead();
+      }
+    });
+    socket.on('respawn', (data: { id: string }) => {
+      const snake = this.snakes.find((snake) => snake.playerId === data.id);
+      if (snake) {
+        snake.respawn();
+      }
+    });
     socket.on('step', (data: roomData) => {
       data.bullets.forEach((bullet) => {
         const candidate = this.bullets.find((oBullet) => oBullet.id === bullet.id);

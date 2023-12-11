@@ -1,4 +1,4 @@
-import { socket } from '../../main';
+import { ceilPhysicalHeight, ceilPhysicalWidth, socket } from '../../main';
 import SpeedRun from './SpeedRun';
 import MapState from '../State/MapState';
 import MainScene from '../scenes/MainScene';
@@ -26,7 +26,6 @@ export default class Snake {
     this.playerId = playerID;
 
     this.speedBonus = new SpeedRun(playerID, this);
-
     this.drawBody = this.createBody(body);
 
     if (MapState.getInstance().getUserid() === this.playerId) {
@@ -109,6 +108,8 @@ export default class Snake {
       const drawBodyItem = this.drawBody[i].item;
       // Перемещаем видимые элементы
       if (drawBodyItem) {
+        drawBodyItem.setMx(bodyItem.x);
+        drawBodyItem.setMy(bodyItem.y);
         drawBodyItem.sprite.setX(this.getXCord(bodyItem.x));
         drawBodyItem.sprite.setY(this.getYCord(bodyItem.y));
       }
@@ -169,6 +170,32 @@ export default class Snake {
   protected getYCord(y: number): number {
     const ceilHeight = this.scene.ceilHeight / 2;
     return y * ceilHeight + ceilHeight / 2;
+  }
+
+  public dead() {
+    this.scene.tweens.add({
+      targets: [
+        ...this.drawBody.map((bodyItem) => bodyItem.item?.sprite),
+        ...this.drawBody.map((bodyItem) => bodyItem.item?.background),
+      ],
+      duration: 500,
+      ease: 'Linear',
+      alpha: 0,
+    });
+    for (const bodyItem of this.drawBody) {
+      bodyItem.item?.dead();
+    }
+  }
+  public respawn() {
+    this.scene.tweens.add({
+      targets: [
+        ...this.drawBody.map((bodyItem) => bodyItem.item?.sprite),
+        ...this.drawBody.map((bodyItem) => bodyItem.item?.background),
+      ],
+      duration: 200,
+      ease: 'Linear',
+      alpha: 1,
+    });
   }
 
   public destroy() {

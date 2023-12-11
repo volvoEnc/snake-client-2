@@ -1,9 +1,12 @@
 import Phaser from 'phaser';
 import MainScene from '../scenes/MainScene';
+import { ceilPhysicalHeight, ceilPhysicalWidth } from '../../main';
 
 export default class SnakeBody {
   // Следующий элемент тела змеи
   protected readonly nextItem: SnakeBody | null;
+
+  protected readonly scene: MainScene;
 
   // Положение в клетках по X
   protected mX: number;
@@ -46,6 +49,7 @@ export default class SnakeBody {
     color: number,
   ) {
     this.nextItem = next;
+    this.scene = scene;
 
     this.mX = mX;
     this.mY = mY;
@@ -61,6 +65,14 @@ export default class SnakeBody {
 
   public setDirection(direction: string): void {
     this.direction = direction;
+  }
+
+  public setMx(mX: number) {
+    this.mX = mX;
+  }
+
+  public setMy(mY: number) {
+    this.mY = mY;
   }
 
   protected checkDiffDirection(): number | null {
@@ -143,5 +155,15 @@ export default class SnakeBody {
     if (this.nextItem) {
       this.nextItem.handleTexture();
     }
+  }
+
+  public dead() {
+    this.scene.add.particles(this.mX * ceilPhysicalWidth, this.mY * ceilPhysicalHeight, 'body2', {
+      speed: { min: 35, max: 75 },
+      quantity: 5,
+      lifespan: { min: 250, max: 400 },
+      duration: 150,
+      scale: 0.25
+    });
   }
 }
