@@ -74,9 +74,19 @@ export default class Snake {
   }
 
   updateBody(body: snakeBody[]) {
+    if (body.length > this.drawBody.length) {
+      const nextBodyItem = this.drawBody[this.drawBody.length - 1].item;
+      if (nextBodyItem) {
+        for (const bodyItem of this.drawBody) {
+          bodyItem.item?.appendIndex();
+        }
+        this.makeBodyItem(body[body.length - 1], nextBodyItem, 0);
+      }
+    }
+
     let index = 0;
     for (const bodyItem of body) {
-      const drawBodyItem = this.drawBody[index].item;
+      const drawBodyItem = this.drawBody[index]?.item;
       const oldBodyItem = this.body[index];
       if (!drawBodyItem) {
         continue;
@@ -161,6 +171,30 @@ export default class Snake {
     }
 
     return bodyItems;
+  }
+
+  protected makeBodyItem(bodyItem: snakeBody, nextItem: SnakeBody, index: number) {
+    const bodyDrawItem: snakeBodyItem = {
+      x: bodyItem.x,
+      y: bodyItem.y,
+      item: null,
+    };
+    bodyDrawItem.item = new SnakeBody(
+      this.scene,
+      this.getXCord(bodyDrawItem.x),
+      this.getYCord(bodyDrawItem.y),
+      'body1',
+      nextItem,
+      bodyItem.x,
+      bodyItem.y,
+      'up',
+      index,
+      this.color,
+    );
+    this.drawBody.push(bodyDrawItem);
+    console.log(nextItem.index);
+    console.log(bodyDrawItem.item.index);
+    console.log(this.drawBody[0].item?.index);
   }
 
   protected getXCord(x: number): number {

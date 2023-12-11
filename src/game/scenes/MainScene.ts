@@ -1,7 +1,7 @@
 import Phaser from 'phaser';
 import Snake from '../Entities/Snake';
 import Eat from '../Entities/Eat';
-import { MapItemTypeEnum, roomData } from '../types/map';
+import { IEat, MapItemTypeEnum, roomData } from '../types/map';
 import MapState from '../State/MapState';
 import { socket } from '../../main';
 import Bullet from '../Entities/Bullet';
@@ -120,6 +120,13 @@ export default class MainScene extends Phaser.Scene {
       if (snake) {
         snake.respawn();
       }
+    });
+
+    socket.on('spawn-eat', (data: IEat) => {
+      this.eats.push(new Eat(this, data.id, data.x, data.y));
+    });
+    socket.on('destroy-eat', (data: IEat) => {
+      // this.eats.push(new Eat(this, data.id, data.x, data.y));
     });
     socket.on('step', (data: roomData) => {
       data.bullets.forEach((bullet) => {

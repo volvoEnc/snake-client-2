@@ -34,6 +34,7 @@ export interface IMap {
 }
 
 export interface IEat {
+  id: string;
   x: number;
   y: number;
 }

@@ -17,7 +17,7 @@ export default class SnakeBody {
   // Направление движения элемента змеи
   protected direction: string;
 
-  protected index: number;
+  public index: number;
 
   public background: Phaser.GameObjects.Rectangle;
   public sprite: Phaser.GameObjects.Sprite;
@@ -111,6 +111,10 @@ export default class SnakeBody {
     return null;
   }
 
+  public appendIndex(): void {
+    this.index++;
+  }
+
   public handleTexture(): void {
     let type: string = 'body';
     let variant: string = 'default';
@@ -163,7 +167,7 @@ export default class SnakeBody {
       quantity: 5,
       lifespan: { min: 250, max: 400 },
       duration: 150,
-      scale: 0.25
+      scale: 0.25,
     });
   }
 }
