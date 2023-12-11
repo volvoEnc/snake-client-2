@@ -16,6 +16,8 @@ export default class MainScene extends Phaser.Scene {
   protected eats: Eat[] = [];
   protected bullets: Bullet[] = [];
 
+  protected fpsText: Phaser.GameObjects.Text;
+
   constructor() {
     super({ key: 'MainScene', active: true });
     this.roomData = MapState.getInstance().getMapData();
@@ -28,6 +30,7 @@ export default class MainScene extends Phaser.Scene {
     this.load.image('tail1', 'snake/tail1.png');
     this.load.image('tail2', 'snake/tail2.png');
     this.load.image('head1', 'snake/head1.png');
+    this.load.image('food', 'food.png');
     this.load.image('bulletParticle', 'particles/bulletParticle.png');
     this.load.tilemapTiledJSON('map', 'map.json');
   }
@@ -36,6 +39,13 @@ export default class MainScene extends Phaser.Scene {
     if (!this.roomData) {
       return;
     }
+
+    this.fpsText = this.add.text(100, 100, 'FPS: ', { fontSize: 40 });
+    this.fpsText.depth = 100;
+
+    setInterval(() => {
+      this.fpsText.setText(`FPS: ${this.game.loop.actualFps}`);
+    });
 
     // this.scale.setZoom(0.8);
     this.cameras.main.setBounds(
@@ -82,7 +92,7 @@ export default class MainScene extends Phaser.Scene {
       if (item.type === MapItemTypeEnum.SOLID) {
         strokeColor = 0xeb4034;
       }
-      ceil.setStrokeStyle(1, strokeColor, 0).setOrigin(0, 0);
+      ceil.setStrokeStyle(1, strokeColor, 0.3).setOrigin(0, 0);
     }
 
     // Создаем змеек
@@ -95,7 +105,7 @@ export default class MainScene extends Phaser.Scene {
     });
     socket.on('delete-bullet', (data: { id: string }) => {
       const bulletIndex = this.bullets.findIndex((bullet) => bullet.id === data.id);
-      if (bulletIndex) {
+      if (bulletIndex !== -1) {
         const bullet = this.bullets[bulletIndex];
         bullet.destroy();
         this.bullets.splice(bulletIndex, 1);
@@ -125,8 +135,15 @@ export default class MainScene extends Phaser.Scene {
     socket.on('spawn-eat', (data: IEat) => {
       this.eats.push(new Eat(this, data.id, data.x, data.y));
     });
-    socket.on('destroy-eat', (data: IEat) => {
-      // this.eats.push(new Eat(this, data.id, data.x, data.y));
+    socket.on('destroy-eat', (data: { id: string }) => {
+      const eatIndex = this.eats.findIndex((eat) => eat.id === data.id);
+      if (eatIndex !== -1) {
+        const eat = this.eats[eatIndex];
+        if (eat) {
+          eat.destroy();
+        }
+        this.eats.splice(eatIndex, 1);
+      }
     });
     socket.on('step', (data: roomData) => {
       data.bullets.forEach((bullet) => {
