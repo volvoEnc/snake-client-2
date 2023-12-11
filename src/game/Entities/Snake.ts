@@ -219,6 +219,12 @@ export default class Snake {
     for (const bodyItem of this.drawBody) {
       bodyItem.item?.dead();
     }
+    // for (let i = 0; i < this.drawBody.length; i++) {
+    //   if (i > 5) {
+    //     this.drawBody[i].item?.sprite.destroy(true);
+    //     this.drawBody[i].item?.background.destroy(true);
+    //   }
+    // }
   }
   public respawn() {
     this.scene.tweens.add({
