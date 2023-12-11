@@ -16,7 +16,7 @@ export default class SnakeBody {
 
   protected index: number;
 
-  protected background: Phaser.GameObjects.Rectangle;
+  public background: Phaser.GameObjects.Rectangle;
   public sprite: Phaser.GameObjects.Sprite;
 
   protected readonly TEXTURES = {

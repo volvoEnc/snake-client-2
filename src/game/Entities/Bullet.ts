@@ -27,7 +27,7 @@ export default class Bullet {
 
     this.sprite = scene.add
       .rectangle(mX * (scene.ceilWidth / 2), mY * (scene.ceilWidth / 2), 16, 8, color)
-      .setAngle(this.directionToAngle(direction))
+      .setAngle(this.directionToAngle(direction));
 
     this.destroyParticles = scene.add
       .particles(mX * ceilPhysicalWidth, mY * ceilPhysicalHeight, 'bulletParticle', {

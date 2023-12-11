@@ -170,4 +170,11 @@ export default class Snake {
     const ceilHeight = this.scene.ceilHeight / 2;
     return y * ceilHeight + ceilHeight / 2;
   }
+
+  public destroy() {
+    for (const bodyItem of this.drawBody) {
+      bodyItem.item?.sprite.destroy(true);
+      bodyItem.item?.background.destroy(true);
+    }
+  }
 }
