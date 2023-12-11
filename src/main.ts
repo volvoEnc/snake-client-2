@@ -5,8 +5,8 @@ import Phaser from 'phaser';
 import { io } from 'socket.io-client';
 import MainScene from './game/scenes/MainScene';
 
-// export const socket = io('ws://109.194.141.184:4338/snake');
-export const socket = io('ws://127.0.0.1:4338/snake');
+export const socket = io('ws://109.194.141.184:4338/snake');
+// export const socket = io('ws://127.0.0.1:4338/snake');
 export const ceilWidth = 32;
 export const ceilHeight = 32;
 export const ceilPhysicalWidth = 16;
