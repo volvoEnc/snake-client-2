@@ -92,7 +92,7 @@ export default class MainScene extends Phaser.Scene {
       if (item.type === MapItemTypeEnum.SOLID) {
         strokeColor = 0xeb4034;
       }
-      ceil.setStrokeStyle(1, strokeColor, 0.3).setOrigin(0, 0);
+      ceil.setStrokeStyle(1, strokeColor, 0).setOrigin(0, 0);
     }
 
     // Создаем змеек
