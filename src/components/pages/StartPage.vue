@@ -39,12 +39,25 @@ function checkConnect(attempts) {
 </script>
 
 <style scoped>
+.wrapper {
+  width: 100%;
+  height: 100vh;
+  background: url("background.png");
+  background-size: cover;
+  display: flex;
+  align-items: end;
+  justify-content: center;
+}
 .game-start {
-  width: 300px;
-  height: 40px;
-  background: #b73737;
+  width: 256px;
+  height: 256px;
+  background: transparent;
   color: #fff;
   cursor: pointer;
+  border-radius: 50%;
+  border: solid 5px #242441;
+  font-size: 32px;
+  text-transform: uppercase;
 }
 .game-start:disabled {
   background: #242424;

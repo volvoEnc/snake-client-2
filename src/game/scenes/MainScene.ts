@@ -16,7 +16,7 @@ export default class MainScene extends Phaser.Scene {
   protected eats: Eat[] = [];
   protected bullets: Bullet[] = [];
 
-  protected fpsText: Phaser.GameObjects.Text;
+  protected fpsText: Phaser.GameObjects.Text | null = null;
 
   constructor() {
     super({ key: 'MainScene', active: true });
@@ -29,7 +29,8 @@ export default class MainScene extends Phaser.Scene {
     this.load.image('body2', 'snake/body2.png');
     this.load.image('tail1', 'snake/tail1.png');
     this.load.image('tail2', 'snake/tail2.png');
-    this.load.image('head1', 'snake/head1.png');
+    this.load.image('head1', 'snake/head.png');
+    this.load.image('greenCircle', 'greenCircle.png');
     this.load.image('food', 'food.png');
     this.load.image('bulletParticle', 'particles/bulletParticle.png');
     this.load.tilemapTiledJSON('map', 'map.json');
@@ -40,11 +41,11 @@ export default class MainScene extends Phaser.Scene {
       return;
     }
 
-    this.fpsText = this.add.text(100, 100, 'FPS: ', { fontSize: 40 });
+    this.fpsText = this.add.text(100, 100, 'FPS: ', { fontSize: 24 });
     this.fpsText.depth = 100;
 
     setInterval(() => {
-      this.fpsText.setText(`FPS: ${this.game.loop.actualFps}`);
+      this.fpsText?.setText(`FPS: ${this.game.loop.actualFps}`);
     });
 
     // this.scale.setZoom(0.8);

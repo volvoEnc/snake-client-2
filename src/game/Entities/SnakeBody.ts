@@ -4,7 +4,7 @@ import { ceilPhysicalHeight, ceilPhysicalWidth } from '../../main';
 
 export default class SnakeBody {
   // Следующий элемент тела змеи
-  protected readonly nextItem: SnakeBody | null;
+  protected nextItem: SnakeBody | null = null;
 
   protected readonly scene: MainScene;
 
@@ -19,21 +19,20 @@ export default class SnakeBody {
 
   public index: number;
 
-  public background: Phaser.GameObjects.Rectangle;
   public sprite: Phaser.GameObjects.Sprite;
 
-  protected readonly TEXTURES = {
+  protected readonly TEXTURES: { [key: string]: { default: string; rotate: string } } = {
     head: {
       default: 'head1',
       rotate: 'head1',
     },
     tail: {
-      default: 'tail1',
-      rotate: 'tail2',
+      default: 'greenCircle',
+      rotate: 'greenCircle',
     },
     body: {
-      default: 'body2',
-      rotate: 'body1',
+      default: 'greenCircle',
+      rotate: 'greenCircle',
     },
   };
   constructor(
@@ -46,7 +45,6 @@ export default class SnakeBody {
     mY: number,
     direction: string,
     index: number,
-    color: number,
   ) {
     this.nextItem = next;
     this.scene = scene;
@@ -56,13 +54,15 @@ export default class SnakeBody {
     this.direction = direction;
     this.index = index;
 
-    this.background = scene.add.rectangle(x, y, 32, 16, color);
-    this.background.setDepth(1);
     this.sprite = scene.add.sprite(x, y, texture);
     this.sprite.addToUpdateList();
     this.sprite.setDepth(2);
+    this.sprite.setAngle(Phaser.Math.Between(0, 360));
   }
 
+  public setNextItem(item: SnakeBody | null) {
+    this.nextItem = item;
+  }
   public setDirection(direction: string): void {
     this.direction = direction;
   }
@@ -117,16 +117,16 @@ export default class SnakeBody {
 
   public handleTexture(): void {
     let type: string = 'body';
-    let variant: string = 'default';
+    let variant: 'default' | 'rotate' = 'default';
     const rotateAngle = this.checkDiffDirection();
     let angle = 0;
 
     // Определяем вид элемента (голова, тело, хвост)
     if (this.index === 0) {
-      type = 'tail';
+      type = 'head';
     }
     if (!this.nextItem) {
-      type = 'head';
+      type = 'tail';
     }
 
     // Определяем вариант текстуры (обычная, с изгибом)
@@ -146,15 +146,17 @@ export default class SnakeBody {
       }
     }
 
-    this.background.setVisible(variant === 'default' && type === 'body');
-
-    this.background.setAngle(rotateAngle ?? angle);
-    this.background.setX(this.sprite.x);
-    this.background.setY(this.sprite.y);
-
-    const texture = this.TEXTURES[type][variant];
-    this.sprite.setTexture(texture);
-    this.sprite.setAngle(rotateAngle ?? angle);
+    const textureType = this.TEXTURES[type];
+    let texture: string | null = null;
+    if (textureType) {
+      texture = textureType[variant];
+    }
+    if (this.sprite && texture) {
+      this.sprite.setTexture(texture);
+      if (type === 'head') {
+        this.sprite.setAngle(rotateAngle ?? angle);
+      }
+    }
 
     if (this.nextItem) {
       this.nextItem.handleTexture();
@@ -169,5 +171,8 @@ export default class SnakeBody {
       duration: 150,
       scale: 0.25,
     });
+  }
+  public destroy() {
+    this.sprite.destroy(true);
   }
 }

@@ -9,7 +9,7 @@ export default class Bullet {
   protected readonly direction: string;
   public readonly id: string;
 
-  protected sprite: Phaser.GameObjects.Shape;
+  protected sprite: Phaser.GameObjects.Image;
   protected destroyParticles: Phaser.GameObjects.Particles.ParticleEmitter;
 
   constructor(
@@ -26,8 +26,8 @@ export default class Bullet {
     this.direction = direction;
 
     this.sprite = scene.add
-      .rectangle(mX * (scene.ceilWidth / 2), mY * (scene.ceilWidth / 2), 16, 8, color)
-      .setAngle(this.directionToAngle(direction));
+      .image(mX * (scene.ceilWidth / 2), mY * (scene.ceilWidth / 2), 'greenCircle')
+      .setOrigin(0, 0);
 
     this.destroyParticles = scene.add
       .particles(mX * ceilPhysicalWidth, mY * ceilPhysicalHeight, 'bulletParticle', {

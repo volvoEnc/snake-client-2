@@ -1,4 +1,4 @@
-import { ceilPhysicalHeight, ceilPhysicalWidth, socket } from '../../main';
+import { socket } from '../../main';
 import SpeedRun from './SpeedRun';
 import MapState from '../State/MapState';
 import MainScene from '../scenes/MainScene';
@@ -27,6 +27,7 @@ export default class Snake {
 
     this.speedBonus = new SpeedRun(playerID, this);
     this.drawBody = this.createBody(body);
+    this.rebuildBodyItems();
 
     if (MapState.getInstance().getUserid() === this.playerId) {
       if (scene.input.keyboard) {
@@ -75,13 +76,21 @@ export default class Snake {
 
   updateBody(body: snakeBody[]) {
     if (body.length > this.drawBody.length) {
-      const nextBodyItem = this.drawBody[this.drawBody.length - 1].item;
-      if (nextBodyItem) {
-        for (const bodyItem of this.drawBody) {
-          bodyItem.item?.appendIndex();
-        }
-        this.makeBodyItem(body[body.length - 1], nextBodyItem, 0);
+      const oldBodyItem = this.drawBody[this.drawBody.length - 1].item;
+      if (oldBodyItem) {
+        const newBodyItem = this.makeBodyItem(body[body.length - 1], body.length - 1);
+        this.drawBody.push(newBodyItem);
+        oldBodyItem.setNextItem(newBodyItem.item);
       }
+    }
+    if (body.length < this.drawBody.length) {
+      for (let i = this.drawBody.length - 1; i > 0; i--) {
+        if (i >= body.length) {
+          this.drawBody[i].item?.destroy();
+          this.drawBody.splice(i, 1);
+        }
+      }
+      this.rebuildBodyItems();
     }
 
     let index = 0;
@@ -115,7 +124,7 @@ export default class Snake {
     }
     for (let i = 0; i < body.length; i++) {
       const bodyItem = body[i];
-      const drawBodyItem = this.drawBody[i].item;
+      const drawBodyItem = this.drawBody[i]?.item ?? null;
       // Перемещаем видимые элементы
       if (drawBodyItem) {
         drawBodyItem.setMx(bodyItem.x);
@@ -124,7 +133,7 @@ export default class Snake {
         drawBodyItem.sprite.setY(this.getYCord(bodyItem.y));
       }
     }
-    this.drawBody[this.drawBody.length - 1].item?.handleTexture();
+    this.drawBody[0].item?.handleTexture();
 
     this.body = body;
   }
@@ -140,7 +149,6 @@ export default class Snake {
 
   protected createBody(body: snakeBody[]) {
     let idx = 0;
-    let nextItem: SnakeBody | null = null;
     const bodyItems: snakeBodyItem[] = [];
     for (const bodyItem of body) {
       // make item
@@ -154,14 +162,12 @@ export default class Snake {
         this.getXCord(bodyDrawItem.x),
         this.getYCord(bodyDrawItem.y),
         'body1',
-        nextItem,
+        null,
         bodyItem.x,
         bodyItem.y,
         'up',
-        body.length - idx - 1,
-        this.color,
+        idx,
       );
-      nextItem = bodyDrawItem.item;
       if (idx === 0 && this.playerId === MapState.getInstance().getUserid()) {
         this.scene.cameras.main.startFollow(bodyDrawItem.item.sprite, true, 0.005, 0.005);
       }
@@ -173,7 +179,13 @@ export default class Snake {
     return bodyItems;
   }
 
-  protected makeBodyItem(bodyItem: snakeBody, nextItem: SnakeBody, index: number) {
+  protected rebuildBodyItems() {
+    for (let i = 0; i < this.drawBody.length; i++) {
+      this.drawBody[i].item?.setNextItem(this.drawBody[i + 1]?.item ?? null);
+    }
+  }
+
+  protected makeBodyItem(bodyItem: snakeBody, index: number) {
     const bodyDrawItem: snakeBodyItem = {
       x: bodyItem.x,
       y: bodyItem.y,
@@ -184,17 +196,13 @@ export default class Snake {
       this.getXCord(bodyDrawItem.x),
       this.getYCord(bodyDrawItem.y),
       'body1',
-      nextItem,
+      null,
       bodyItem.x,
       bodyItem.y,
       'up',
       index,
-      this.color,
     );
-    this.drawBody.push(bodyDrawItem);
-    console.log(nextItem.index);
-    console.log(bodyDrawItem.item.index);
-    console.log(this.drawBody[0].item?.index);
+    return bodyDrawItem;
   }
 
   protected getXCord(x: number): number {
@@ -208,10 +216,7 @@ export default class Snake {
 
   public dead() {
     this.scene.tweens.add({
-      targets: [
-        ...this.drawBody.map((bodyItem) => bodyItem.item?.sprite),
-        ...this.drawBody.map((bodyItem) => bodyItem.item?.background),
-      ],
+      targets: [...this.drawBody.map((bodyItem) => bodyItem.item?.sprite)],
       duration: 500,
       ease: 'Linear',
       alpha: 0,
@@ -228,10 +233,7 @@ export default class Snake {
   }
   public respawn() {
     this.scene.tweens.add({
-      targets: [
-        ...this.drawBody.map((bodyItem) => bodyItem.item?.sprite),
-        ...this.drawBody.map((bodyItem) => bodyItem.item?.background),
-      ],
+      targets: [...this.drawBody.map((bodyItem) => bodyItem.item?.sprite)],
       duration: 200,
       ease: 'Linear',
       alpha: 1,
@@ -241,7 +243,6 @@ export default class Snake {
   public destroy() {
     for (const bodyItem of this.drawBody) {
       bodyItem.item?.sprite.destroy(true);
-      bodyItem.item?.background.destroy(true);
     }
   }
 }
