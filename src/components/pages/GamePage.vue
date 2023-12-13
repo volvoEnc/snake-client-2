@@ -1,5 +1,6 @@
 <template>
   <div class="wrapper">
+    <HUD />
     <div id="game" class="game" />
   </div>
 </template>
@@ -7,6 +8,7 @@
 <script setup>
 import { onMounted, ref } from 'vue';
 import { initPhaser } from '../../main.ts';
+import HUD from '../hud/HUD.vue';
 
 const phaserInstance = ref(null);
 
@@ -17,13 +19,6 @@ onMounted(() => {
 
 <style scoped>
 .wrapper {
-  //border: solid 1px #32cd32;
-}
-.game-start {
-  width: 300px;
-  height: 40px;
-  background: #b73737;
-  color: #fff;
-  cursor: pointer;
+  position: relative;
 }
 </style>

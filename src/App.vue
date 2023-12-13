@@ -39,7 +39,6 @@ function startGameServer(data) {
 <style scoped>
 .main {
   width: 100%;
-  height: 100dvh;
   display: flex;
   justify-content: center;
   align-items: center;

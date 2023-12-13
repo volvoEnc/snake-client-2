@@ -5,6 +5,7 @@ import { IEat, MapItemTypeEnum, roomData } from '../types/map';
 import MapState from '../State/MapState';
 import { socket } from '../../main';
 import Bullet from '../Entities/Bullet';
+import { GameStats } from '../classes/GameStats';
 
 export default class MainScene extends Phaser.Scene {
   public readonly ceilWidth: number = 32;
@@ -16,11 +17,12 @@ export default class MainScene extends Phaser.Scene {
   protected eats: Eat[] = [];
   protected bullets: Bullet[] = [];
 
-  protected fpsText: Phaser.GameObjects.Text | null = null;
+  private gameStats: GameStats;
 
   constructor() {
     super({ key: 'MainScene', active: true });
     this.roomData = MapState.getInstance().getMapData();
+    this.gameStats = new GameStats(this);
   }
 
   preload() {
@@ -40,13 +42,6 @@ export default class MainScene extends Phaser.Scene {
     if (!this.roomData) {
       return;
     }
-
-    this.fpsText = this.add.text(100, 100, 'FPS: ', { fontSize: 24 });
-    this.fpsText.depth = 100;
-
-    setInterval(() => {
-      this.fpsText?.setText(`FPS: ${this.game.loop.actualFps}`);
-    });
 
     // this.scale.setZoom(0.8);
     this.cameras.main.setBounds(
@@ -171,6 +166,19 @@ export default class MainScene extends Phaser.Scene {
         }
       });
     });
+
+    this.scale.on('resize', this.resize, this);
+  }
+
+  resize(gameSize, baseSize, displaySize, resolution) {
+    console.log(gameSize);
+    const width = gameSize.width;
+    const height = gameSize.height;
+
+    this.cameras.resize(width, height);
+    // this.game.canvas.width =
+    console.log(gameSize.width);
+    console.log(gameSize.height);
   }
 
   update(time: number, delta: number) {

@@ -6,7 +6,7 @@ import { io } from 'socket.io-client';
 import MainScene from './game/scenes/MainScene';
 
 // export const socket = io('ws://109.194.141.184:4338/snake');
-export const socket = io('ws://127.0.0.1:4338/snake');
+export const socket = io('ws://212.220.200.39:4338/snake');
 export const ceilWidth = 32;
 export const ceilHeight = 32;
 export const ceilPhysicalWidth = 16;
@@ -14,17 +14,21 @@ export const ceilPhysicalHeight = 16;
 
 const phaserConfig = {
   type: Phaser.AUTO,
-  width: 1200,
-  height: 640,
   backgroundColor: '#000000',
-  parent: 'game',
   fullscreenTarget: 'game',
   scene: [MainScene],
   banner: false,
-  physics: {
-    default: 'arcade',
-    arcade: {
-      debug: false,
+  scale: {
+    mode: Phaser.Scale.RESIZE,
+    parent: 'game',
+    width: '100%',
+    height: '100%',
+    min: {
+      width: 300,
+    },
+    max: {
+      width: 1200,
+      height: 640,
     },
   },
 };
